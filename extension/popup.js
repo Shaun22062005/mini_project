@@ -2,9 +2,7 @@ const API_BASE = "http://localhost:5000";
 
 let currentUrl = "";
 
-// ─────────────────────────────────────
-//  ON LOAD: Get current tab URL
-// ─────────────────────────────────────
+
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -17,9 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadHistory();
 });
 
-// ─────────────────────────────────────
-//  SCAN
-// ─────────────────────────────────────
+
 async function scanCurrentTab() {
   if (!currentUrl || currentUrl.startsWith("chrome://") || currentUrl.startsWith("about:")) {
     showError("Cannot scan browser internal pages.");
@@ -59,9 +55,7 @@ async function scanCurrentTab() {
   }
 }
 
-// ─────────────────────────────────────
-//  RENDER
-// ─────────────────────────────────────
+
 function renderResult(data) {
   const resultBox    = document.getElementById("resultBox");
   const resultHeader = document.getElementById("resultHeader");
@@ -80,7 +74,7 @@ function renderResult(data) {
   confVal.textContent = `${data.confidence.toFixed(1)}%`;
   confVal.style.color = "var(--text)";
 
-  // Animate meter
+
   meterFill.style.width = "0%";
   setTimeout(() => { meterFill.style.width = `${data.risk_score}%`; }, 50);
 
@@ -93,9 +87,7 @@ function showError(msg) {
   errorBox.classList.add("visible");
 }
 
-// ─────────────────────────────────────
-//  LOCAL HISTORY  (chrome.storage)
-// ─────────────────────────────────────
+
 function saveToLocalHistory(data) {
   chrome.storage.local.get(["scanHistory"], result => {
     const history = result.scanHistory || [];
@@ -105,7 +97,7 @@ function saveToLocalHistory(data) {
       risk:      data.risk_score,
       timestamp: new Date().toISOString()
     });
-    // Keep last 20
+
     chrome.storage.local.set({ scanHistory: history.slice(0, 20) });
   });
 }

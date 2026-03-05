@@ -7,17 +7,14 @@ from datetime import datetime
 
 warnings.filterwarnings("ignore")
 
-# ─────────────────────────────────────────────
-#  LEXICAL / URL FEATURES  (no network calls)
-# ─────────────────────────────────────────────
 
 def having_IP_Address(url):
     try:
         hostname = urlparse(url).netloc.split(":")[0]
         ipaddress.ip_address(hostname)
-        return 1   # IP used → suspicious
+        return 1   
     except:
-        return -1  # domain name → legitimate
+        return -1 
 
 def URL_Length(url):
     return -1 if len(url) < 54 else (0 if len(url) <= 75 else 1)
@@ -35,7 +32,7 @@ def having_At_Symbol(url):
     return 1 if "@" in url else -1
 
 def double_slash_redirecting(url):
-    # Check for // after the protocol part
+    
     path = urlparse(url).path
     return 1 if "//" in path else -1
 
@@ -45,7 +42,7 @@ def Prefix_Suffix(url):
 
 def having_Sub_Domain(url):
     hostname = urlparse(url).netloc
-    # Remove www. prefix
+  
     hostname = re.sub(r"^www\.", "", hostname)
     dot_count = hostname.count(".")
     if dot_count == 1:
@@ -275,7 +272,7 @@ def DNSRecord(domain_info):
         return 1
 
 def web_traffic(url):
-    # Without Alexa API, use URL characteristics as proxy
+
     hostname = urlparse(url).netloc
     known = ["google", "facebook", "amazon", "youtube", "wikipedia",
              "twitter", "instagram", "linkedin", "microsoft", "apple"]
@@ -285,22 +282,19 @@ def web_traffic(url):
     return 0
 
 def Page_Rank(url):
-    return 0  # Google PageRank API deprecated; neutral
+    return 0  
 
 def Google_Index(url):
-    return 0  # Would require Google API; neutral
+    return 0 
 
 def Links_pointing_to_page(url, soup=None):
-    return 0  # Requires external lookup; neutral
+    return 0  
 
 def Statistical_report(url):
     hostname = urlparse(url).netloc
     flagged = ["at.", ".tk", ".ml", ".ga", ".cf", ".gq"]
     return 1 if any(hostname.endswith(f) for f in flagged) else -1
 
-# ─────────────────────────────────────────────
-#  MAIN EXTRACTION ENTRY POINT
-# ─────────────────────────────────────────────
 
 def extract_features(url, fetch_html=True):
     """
@@ -310,7 +304,7 @@ def extract_features(url, fetch_html=True):
     soup = None
     domain_info = None
 
-    # --- Optional: fetch HTML ---
+   
     if fetch_html:
         try:
             import requests
@@ -321,7 +315,7 @@ def extract_features(url, fetch_html=True):
         except Exception as e:
             print(f"    [HTML] Could not fetch page: {e}")
 
-    # --- Optional: WHOIS lookup ---
+    
     try:
         import whois as whois_lib
         hostname = urlparse(url).netloc.split(":")[0]
@@ -365,14 +359,13 @@ def extract_features(url, fetch_html=True):
 
     arr = np.array([features], dtype=float)
 
-    # ── Auto-resize to match whatever the saved model expects ──
-    # This makes the extractor resilient to models trained on 30, 31, or any count.
+ 
     try:
         import joblib, os
         MODEL_FILE = os.path.join(os.path.dirname(__file__), "hybrid_model.pkl")
         if os.path.exists(MODEL_FILE):
             _m = joblib.load(MODEL_FILE)
-            # VotingClassifier wraps estimators; get n_features from first sub-estimator
+         
             try:
                 expected = _m.estimators_[0].n_features_in_
             except AttributeError:
@@ -413,7 +406,7 @@ def scan_url(url, fetch_html=True):
 
     is_phishing = int(prediction) == 1
     confidence = float(probabilities[1] if is_phishing else probabilities[0]) * 100
-    risk_score = float(probabilities[1]) * 100  # always the phishing probability
+    risk_score = float(probabilities[1]) * 100 
 
     result = {
         "url": url,

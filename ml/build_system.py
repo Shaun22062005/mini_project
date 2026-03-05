@@ -26,7 +26,7 @@ def initialize_system(tune_hyperparams=False):
     print(f"\n[1] Loading {DATA_FILE}...")
     data = pd.read_csv(DATA_FILE)
 
-    # Drop non-feature columns
+
     for col in ['id', 'Index']:
         if col in data.columns:
             data = data.drop(columns=[col])
@@ -41,7 +41,7 @@ def initialize_system(tune_hyperparams=False):
         X, y, test_size=0.2, random_state=42, stratify=y
     )
 
-    # ── Step 2: Hyperparameter tuning (optional, slow) ──
+   
     if tune_hyperparams:
         print("\n[2] Running GridSearchCV for Random Forest...")
         rf_params = {
@@ -75,7 +75,7 @@ def initialize_system(tune_hyperparams=False):
         best_rf_params = {"max_depth": None, "min_samples_split": 2, "n_estimators": 200}
         best_xgb_params = {"learning_rate": 0.1, "max_depth": 6, "n_estimators": 200}
 
-    # ── Step 3: Build Voting Classifier ──
+    
     print("\n[3] Building Hybrid Voting Classifier (RF + XGBoost)...")
     rf = RandomForestClassifier(**best_rf_params, random_state=42)
     xgb = XGBClassifier(
@@ -93,7 +93,6 @@ def initialize_system(tune_hyperparams=False):
     print("[4] Training model...")
     model.fit(X_train, y_train)
 
-    # ── Step 4: Evaluate ──
     predictions = model.predict(X_test)
     acc = accuracy_score(y_test, predictions)
 
@@ -103,11 +102,11 @@ def initialize_system(tune_hyperparams=False):
     print("\nClassification Report:")
     print(classification_report(y_test, predictions, target_names=["Legitimate", "Phishing"]))
 
-    # Cross-val sanity check
+
     cv_scores = cross_val_score(model, X, y, cv=5, scoring='accuracy')
     print(f"5-Fold Cross-Val Accuracy: {cv_scores.mean()*100:.2f}% ± {cv_scores.std()*100:.2f}%")
 
-    # ── Step 5: Save ──
+
     joblib.dump(model, MODEL_FILE)
     print(f"\n[✓] Model saved to {MODEL_FILE}")
 

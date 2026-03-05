@@ -5,19 +5,16 @@ import os
 import sys
 import datetime
 
-# ── Path setup so we can import our ml module ──
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "ml"))
 from feature_extractor import scan_url
 
 app = Flask(__name__, static_folder="frontend", static_url_path="")
-CORS(app)  # Allow Chrome extension and local dev to call the API
+CORS(app)  
 
 DB_FILE = os.path.join(os.path.dirname(__file__), "scan_logs.db")
 
 
-# ───────────────────────────────────────────
-#  DATABASE SETUP
-# ───────────────────────────────────────────
+
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
@@ -47,9 +44,7 @@ def log_scan(url, label, risk_score, confidence):
     conn.close()
 
 
-# ───────────────────────────────────────────
-#  ROUTES
-# ───────────────────────────────────────────
+
 
 @app.route("/")
 def index():
@@ -71,12 +66,12 @@ def api_scan():
     if not url:
         return jsonify({"error": "URL cannot be empty"}), 400
 
-    # Prepend https:// if no scheme provided
+
     if not url.startswith(("http://", "https://")):
         url = "https://" + url
 
     try:
-        # fetch_html=True enables HTML scraping; set False for faster testing
+      
         fetch_html = data.get("fetch_html", True)
         result = scan_url(url, fetch_html=fetch_html)
 
@@ -126,9 +121,7 @@ def api_stats():
     }), 200
 
 
-# ───────────────────────────────────────────
-#  MAIN
-# ───────────────────────────────────────────
+
 
 if __name__ == "__main__":
     init_db()
