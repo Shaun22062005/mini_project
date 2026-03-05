@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>PhishGuard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:      #080b10;
+      --surface: #0e1420;
+      --border:  rgba(255,255,255,0.08);
+      --text:    #e8edf5;
+      --muted:   #6b7a99;
+      --accent:  #00e5ff;
+      --safe:    #22c55e;
+      --danger:  #ef4444;
+      --warn:    #f59e0b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      width: 320px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+    }
+
+    /* Header */
+    .header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 16px 18px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .header-icon { font-size: 20px; color: var(--accent); }
+    .header-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; }
+    .header-sub { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+    /* Current URL */
+    .url-section { padding: 14px 18px 10px; }
+    .url-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+    .url-display {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px 12px;
+      font-size: 11px; color: var(--muted);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* Scan button */
+    .scan-btn {
+      display: block; width: calc(100% - 36px);
+      margin: 10px 18px 14px;
+      padding: 12px;
+      background: var(--accent); color: #000;
+      font-family: 'Space Mono', monospace; font-weight: 700; font-size: 13px;
+      border: none; border-radius: 10px; cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 0 18px rgba(0,229,255,0.2);
+    }
+    .scan-btn:hover { background: #33eeff; }
+    .scan-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Result */
+    .result {
+      margin: 0 18px 14px;
+      border-radius: 10px; overflow: hidden;
+      border: 1px solid var(--border);
+      display: none;
+    }
+    .result.visible { display: block; animation: fadeUp 0.3s ease; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-header {
+      padding: 12px 14px;
+      font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800;
+    }
+    .result-header.phishing { background: rgba(239,68,68,0.1); color: var(--danger); }
+    .result-header.safe     { background: rgba(34,197,94,0.08); color: var(--safe); }
+
+    .result-body { padding: 12px 14px; background: var(--surface); }
+
+    .metric-row {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px;
+    }
+    .metric-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .metric-val { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; }
+
+    .meter-track {
+      height: 8px; background: var(--bg); border-radius: 100px; overflow: hidden;
+      margin-bottom: 4px;
+    }
+    .meter-fill {
+      height: 100%; border-radius: 100px;
+      background: linear-gradient(90deg, var(--safe), var(--warn), var(--danger));
+      transition: width 0.9s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* History mini */
+    .history-section {
+      border-top: 1px solid var(--border);
+      padding: 12px 18px 14px;
+    }
+    .history-title { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+    .history-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 11px;
+    }
+    .history-item:last-child { border-bottom: none; }
+    .h-url { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
+    .h-badge {
+      font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 100px;
+    }
+    .h-badge.ph { background: rgba(239,68,68,0.15); color: var(--danger); }
+    .h-badge.ok { background: rgba(34,197,94,0.12); color: var(--safe); }
+
+    .open-full {
+      display: block; text-align: center;
+      padding: 10px; font-size: 11px; color: var(--accent);
+      text-decoration: none; border-top: 1px solid var(--border);
+    }
+    .open-full:hover { background: rgba(0,229,255,0.04); }
+
+    .error-msg {
+      margin: 0 18px 14px; padding: 12px;
+      background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2);
+      border-radius: 8px; font-size: 12px; color: var(--warn);
+      display: none;
+    }
+    .error-msg.visible { display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <span class="header-icon">⬡</span>
+    <div>
+      <div class="header-title">PhishGuard</div>
+      <div class="header-sub">ML-powered phishing detector</div>
+    </div>
+  </div>
+
+  <div class="url-section">
+    <div class="url-label">Current Tab</div>
+    <div class="url-display" id="currentUrl">Loading...</div>
+  </div>
+
+  <button class="scan-btn" id="scanBtn" onclick="scanCurrentTab()">
+    🔍 Scan This Page
+  </button>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <div class="result" id="resultBox">
+    <div class="result-header" id="resultHeader"></div>
+    <div class="result-body">
+      <div class="metric-row">
+        <span class="metric-label">Risk Score</span>
+        <span class="metric-val" id="riskVal">—</span>
+      </div>
+      <div class="meter-track">
+        <div class="meter-fill" id="meterFill" style="width:0%"></div>
+      </div>
+      <div class="metric-row" style="margin-top:10px">
+        <span class="metric-label">Confidence</span>
+        <span class="metric-val" id="confVal">—</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="history-section">
+    <div class="history-title">Recent</div>
+    <div id="historyList"></div>
+  </div>
+
+  <a class="open-full" href="http://localhost:5000" target="_blank">
+    Open Full Dashboard ↗
+  </a>
+
+  <script src="popup.js"></script>
+</body>
+</html>
