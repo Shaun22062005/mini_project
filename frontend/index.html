@@ -1,37 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PhishGuard — URL Scanner</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
 
-  <!-- Background grid -->
+<body>
   <div class="bg-grid"></div>
   <div class="noise"></div>
-
-  <!-- Header -->
   <header>
     <div class="logo">
       <span class="logo-icon">⬡</span>
       <span class="logo-text">PhishGuard</span>
     </div>
-    <nav>
-      <a href="#scanner">Scanner</a>
-      <a href="#history">History</a>
-      <a href="https://github.com" target="_blank" class="nav-btn">GitHub ↗</a>
+    <nav class="nav-right">
+      <a href="#" class="nav-btn">Scanner</a>
+      <a href="#history" class="nav-btn">History</a>
     </nav>
   </header>
-
-  <!-- Hero -->
   <section class="hero">
     <div class="hero-badge">
       <span class="pulse-dot"></span>
-      ML-Powered Detection  ·  Real-Time Analysis
+      ML-Powered Detection · Real-Time Analysis
     </div>
     <h1>Is that URL<br><span class="accent">safe to open?</span></h1>
     <p class="hero-sub">
@@ -39,36 +36,24 @@
       and returns a risk score in seconds.
     </p>
   </section>
-
-  <!-- Scanner -->
   <section id="scanner" class="scanner-section">
     <div class="scanner-card">
       <div class="input-row">
         <div class="input-wrap">
           <span class="input-prefix">URL</span>
-          <input
-            type="text"
-            id="urlInput"
-            placeholder="https://example.com"
-            autocomplete="off"
-            spellcheck="false"
-          />
+          <input type="text" id="urlInput" placeholder="https://example.com" autocomplete="off" spellcheck="false" />
         </div>
         <button id="scanBtn" onclick="scanURL()">
           <span id="btnLabel">Scan</span>
-          <svg id="btnSpinner" class="spinner hidden" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="31.4 31.4" transform="rotate(-90 12 12)"/>
+          <svg id="btnSpinner" class="spinner hidden" viewBox="0 0 24 24" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+              stroke-dasharray="31.4 31.4" transform="rotate(-90 12 12)" />
           </svg>
         </button>
       </div>
-
-      <!-- Result Panel -->
       <div id="resultPanel" class="result-panel hidden">
-
-        <!-- Label -->
         <div id="resultLabel" class="result-label"></div>
-
-        <!-- Risk Meter -->
         <div class="meter-section">
           <div class="meter-header">
             <span>Risk Score</span>
@@ -86,23 +71,15 @@
             <span class="zone danger-zone">Danger</span>
           </div>
         </div>
-
-        <!-- Confidence -->
         <div class="confidence-row">
           <span class="conf-label">Model Confidence</span>
           <span id="confValue" class="conf-value">—</span>
         </div>
-
-        <!-- Feature flags -->
         <div class="flags-grid" id="flagsGrid"></div>
-
-        <!-- Scanned URL display -->
         <div class="scanned-url" id="scannedUrl"></div>
       </div>
     </div>
   </section>
-
-  <!-- Stats bar -->
   <section class="stats-bar" id="statsBar">
     <div class="stat-item">
       <span class="stat-val" id="statTotal">—</span>
@@ -124,10 +101,14 @@
       <span class="stat-key">Phishing Rate</span>
     </div>
   </section>
-
-  <!-- Scan History -->
   <section id="history" class="history-section">
-    <h2>Recent Scans</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h2 style="margin: 0;">Recent Scans</h2>
+      <button id="clearHistoryBtn" class="nav-btn"
+        style="background: var(--danger); border-color: var(--danger); color: white; cursor: pointer;">
+        Clear History
+      </button>
+    </div>
     <div class="history-table-wrap">
       <table id="historyTable">
         <thead>
@@ -148,14 +129,12 @@
       </table>
     </div>
   </section>
-
-  <!-- Footer -->
   <footer>
     <span>Group A7 · PhishGuard</span>
     <span>Sriram · Krishnaprasad · Shaun · Thomas</span>
     <span>Guide: Divya Prakash</span>
   </footer>
-
   <script src="script.js"></script>
 </body>
+
 </html>

@@ -2,19 +2,14 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import sqlite3
 import os
+os.environ["PYTHONUNBUFFERED"] = "1"
 import sys
 import datetime
-
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "ml"))
 from feature_extractor import scan_url
-
-app = Flask(__name__, static_folder="frontend", static_url_path="")
-CORS(app)  
-
+app = Flask(__name__, static_folder="Frontend", static_url_path="")
+CORS(app)
 DB_FILE = os.path.join(os.path.dirname(__file__), "scan_logs.db")
-
-
-
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
@@ -32,7 +27,6 @@ def init_db():
     conn.commit()
     conn.close()
 
-
 def log_scan(url, label, risk_score, confidence):
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
@@ -43,57 +37,41 @@ def log_scan(url, label, risk_score, confidence):
     conn.commit()
     conn.close()
 
-
-
-
 @app.route("/")
 def index():
     return send_from_directory(app.static_folder, "index.html")
 
-
 @app.route("/api/scan", methods=["POST"])
 def api_scan():
-    """
-    POST /api/scan
-    Body: { "url": "https://example.com" }
-    Returns: JSON result with label, risk_score, confidence, feature flags
-    """
     data = request.get_json(silent=True)
     if not data or "url" not in data:
         return jsonify({"error": "Missing 'url' in request body"}), 400
-
     url = data["url"].strip()
     if not url:
         return jsonify({"error": "URL cannot be empty"}), 400
-
-
     if not url.startswith(("http://", "https://")):
         url = "https://" + url
-
+    local_hosts = ("http://localhost", "https://localhost", "http://127.0.0.1", "https://127.0.0.1")
+    if url.startswith(local_hosts):
+        return jsonify({"error": "Cannot scan local addresses"}), 400
     try:
-      
         fetch_html = data.get("fetch_html", True)
-        result = scan_url(url, fetch_html=fetch_html)
-
+        skip_whois = data.get("skip_whois", False)
+        result = scan_url(url, fetch_html=fetch_html, skip_whois=skip_whois)
         if "error" in result:
             return jsonify(result), 500
-
         log_scan(
             url=result["url"],
             label=result["label"],
             risk_score=result["risk_score"],
             confidence=result["confidence"],
         )
-
         return jsonify(result), 200
-
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
 @app.route("/api/history", methods=["GET"])
 def api_history():
-    """Return the last 50 scanned URLs."""
     conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
@@ -102,10 +80,17 @@ def api_history():
     conn.close()
     return jsonify(rows), 200
 
+@app.route("/api/history", methods=["DELETE"])
+def api_clear_history():
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("DELETE FROM scan_logs")
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "success", "message": "History cleared"}), 200
 
 @app.route("/api/stats", methods=["GET"])
 def api_stats():
-    """Return aggregate stats for the dashboard."""
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute("SELECT COUNT(*) FROM scan_logs")
@@ -119,9 +104,6 @@ def api_stats():
         "legitimate": total - phishing,
         "phishing_rate": round(phishing / total * 100, 1) if total > 0 else 0
     }), 200
-
-
-
 
 if __name__ == "__main__":
     init_db()

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>PhishGuard – Phishing Blocked</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #080b10;
+            --surface: #0e1420;
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #e8edf5;
+            --muted: #6b7a99;
+            --danger: #ef4444;
+            --warn: #f59e0b;
+            --safe: #22c55e;
+            --accent: #00e5ff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Space Mono', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            border-radius: 16px;
+            max-width: 560px;
+            width: 90%;
+            padding: 40px;
+            box-shadow: 0 0 60px rgba(239, 68, 68, 0.15);
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .icon {
+            font-size: 52px;
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .title {
+            font-family: 'Syne', sans-serif;
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--danger);
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 28px;
+        }
+
+        .url-box {
+            background: rgba(239, 68, 68, 0.06);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 12px;
+            color: var(--danger);
+            word-break: break-all;
+            margin-bottom: 20px;
+        }
+
+        .url-label {
+            font-size: 10px;
+            color: var(--muted);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .risk-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .risk-tile {
+            flex: 1;
+            background: rgba(10, 14, 22, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .risk-tile .label {
+            font-size: 10px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 6px;
+        }
+
+        .risk-tile .value {
+            font-family: 'Syne', sans-serif;
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--danger);
+        }
+
+        .meter-track {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 100px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .meter-fill {
+            height: 100%;
+            border-radius: 100px;
+            background: linear-gradient(90deg, var(--warn), var(--danger));
+            transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-back {
+            flex: 1;
+            padding: 14px;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-back:hover {
+            background: #33eeff;
+        }
+
+        .btn-proceed {
+            flex: 1;
+            padding: 14px;
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-proceed:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .warning-note {
+            margin-top: 16px;
+            font-size: 10px;
+            color: var(--muted);
+            text-align: center;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="icon">🚨</div>
+        <div class="title">Phishing Site Blocked</div>
+        <div class="subtitle">PhishGuard has identified this website as a phishing threat and blocked your access to
+            protect you.</div>
+        <div class="url-box">
+            <div class="url-label">Flagged URL</div>
+            <div id="blockedUrl">Loading…</div>
+        </div>
+        <div class="risk-row">
+            <div class="risk-tile">
+                <div class="label">Risk Score</div>
+                <div class="value" id="riskVal">—</div>
+            </div>
+            <div class="risk-tile">
+                <div class="label">Confidence</div>
+                <div class="value" id="confVal">—</div>
+            </div>
+        </div>
+        <div class="meter-track">
+            <div class="meter-fill" id="meterFill" style="width:0%"></div>
+        </div>
+        <div class="buttons">
+            <button class="btn-back" id="btnBack">← Go Back to Safety</button>
+            <button class="btn-proceed" id="btnProceed">Proceed Anyway (Unsafe)</button>
+        </div>
+        <div class="warning-note">PhishGuard ML detection might occasionally flag legitimate sites.<br>Only proceed if
+            you are absolutely certain this site is safe.</div>
+    </div>
+    <script src="blocked.js"></script>
+</body>
+
+</html>
